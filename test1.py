@@ -1,9 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
+from fake_useragent import FakeUserAgent
+import random
 
-
-url = 'https://arxiv.org/list/cs.AI/recent'
-headers = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36'}
+url = 'https://arxiv.org/list/cs.AI/pastweek?skip=0&show=1000'
+headers = {'User-Agent':FakeUserAgent().random}
 response = requests.get(url, headers=headers)
 html = response.text
 soup = BeautifulSoup(html, 'lxml')
@@ -42,33 +43,33 @@ def strname_date(date_char):
     date_char = date_char[flag1:flag2]
     return date_char
 #写入文件
-f = open('papers.txt','w')
-for i in range(0,len(title_all_)):
-    f.write(f'paper-{i+1}\n')
-    #l论文序号
-    f.write(number_all_[i].text)
-    #print(number_all_[i].text)    
-    #论文标题
-    f.write(title_all_[i].text)
-    #print(title_all_[i].text)
-    #论文作者
-    f.write(authors_all_[i].text)
-    #print(authors_all_[i].text)
-    #论文类别
-    f.write(subject_all_[i].text)
-    #print(subject_all_[i].text)
-    #论文日期
-    response_paper = requests.get(address_list[i],headers=headers)
-    html_paper = response_paper.text
-    soup_paper = BeautifulSoup(html_paper,'lxml')
-    paper_date_content = '#abs > div.dateline'
-    paper_date_content_ = soup_paper.select(paper_date_content)
-    date = strname_date(paper_date_content_[0].text)
-    #print(date)
-    f.write(date)
-    f.write('\n\n\n')
-f.close()
-
+#errors='ignore：遇到非法字符（即不是utf-8标准），则跳过
+with open('papers.txt','w',errors='ignore') as f:
+    for i in range(0,len(title_all_)):
+        f.write(f'paper-{i+1}\n')
+        #l论文序号
+        f.write(number_all_[i].text)
+        #print(number_all_[i].text)    
+        #论文标题
+        f.write(title_all_[i].text)
+        #print(title_all_[i].text)
+        #论文作者
+        f.write(authors_all_[i].text)
+        #print(authors_all_[i].text)
+        #论文类别
+        f.write(subject_all_[i].text)
+        #print(subject_all_[i].text)
+        #论文日期
+        response_paper = requests.get(address_list[i],headers=headers)
+        html_paper = response_paper.text
+        soup_paper = BeautifulSoup(html_paper,'lxml')
+        paper_date_content = '#abs > div.dateline'
+        paper_date_content_ = soup_paper.select(paper_date_content)
+        date = 'date:' + strname_date(paper_date_content_[0].text)
+        #print(date)
+        f.write(date)
+        f.write('\n\n\n')
+print("文件保存成功")
 
 
 
