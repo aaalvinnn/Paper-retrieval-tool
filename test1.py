@@ -8,7 +8,8 @@ headers = {'User-Agent':FakeUserAgent().random}
 response = requests.get(url, headers=headers)
 html = response.text
 soup = BeautifulSoup(html, 'lxml')
-
+import os
+from urllib.request import urlretrieve
 
 #论文标题
 title_all = '#dlpage > dl > dd > div > div.list-title.mathjax'
@@ -31,6 +32,9 @@ for address in address_content_all:
     address = address.get('href')
     address = 'https://arxiv.org' + address
     address_list.append(address)
+#pdf论文下载地址
+pdf_content = '#dlpage > dl > dt > span > a:nth-child(2)'
+pdf_content_all = soup.select(pdf_content)
 #日期字符串截取函数
 def strname_date(date_char):
     flag1 = 0
@@ -42,6 +46,10 @@ def strname_date(date_char):
             flag2 = j
     date_char = date_char[flag1:flag2]
     return date_char
+#写入文件函数
+def download_pdf(pdf_url,i):
+    urlretrieve(pdf_url,fr'C:\Users\28692\Desktop\2022春招\test\Artificial_Intelligence\{i+1}.pdf')
+    print(f'第{i+1}篇论文下载成功')
 #写入文件
 #errors='ignore：遇到非法字符（即不是utf-8标准），则跳过
 with open('papers.txt','w',errors='ignore') as f:
@@ -69,10 +77,10 @@ with open('papers.txt','w',errors='ignore') as f:
         #print(date)
         f.write(date)
         f.write('\n\n\n')
-print("文件保存成功")
-
-
-
+        print(f"第{i+1}篇论文保存成功")
+        #下载论文pdf格式
+        pdf_address = r'https://arxiv.org' + pdf_content_all[i].get('href')
+        download_pdf(pdf_address,i)
     
 
 
