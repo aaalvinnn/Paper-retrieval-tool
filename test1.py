@@ -2,6 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 from fake_useragent import FakeUserAgent
 import random
+from requests.adapters import HTTPAdapter
+import ms
 
 url = 'https://arxiv.org/list/cs.AI/pastweek?skip=0&show=1000'
 headers = {'User-Agent':FakeUserAgent().random}
@@ -35,6 +37,7 @@ for address in address_content_all:
 #pdf论文下载地址
 pdf_content = '#dlpage > dl > dt > span > a:nth-child(2)'
 pdf_content_all = soup.select(pdf_content)
+
 #日期字符串截取函数
 def strname_date(date_char):
     flag1 = 0
@@ -50,37 +53,39 @@ def strname_date(date_char):
 def download_pdf(pdf_url,i):
     urlretrieve(pdf_url,fr'C:\Users\28692\Desktop\2022春招\test\Artificial_Intelligence\{i+1}.pdf')
     print(f'第{i+1}篇论文下载成功')
-#写入文件
-#errors='ignore：遇到非法字符（即不是utf-8标准），则跳过
-with open('papers.txt','w',errors='ignore') as f:
-    for i in range(0,len(title_all_)):
-        f.write(f'paper-{i+1}\n')
-        #l论文序号
-        f.write(number_all_[i].text)
-        #print(number_all_[i].text)    
-        #论文标题
-        f.write(title_all_[i].text)
-        #print(title_all_[i].text)
-        #论文作者
-        f.write(authors_all_[i].text)
-        #print(authors_all_[i].text)
-        #论文类别
-        f.write(subject_all_[i].text)
-        #print(subject_all_[i].text)
-        #论文日期
-        response_paper = requests.get(address_list[i],headers=headers)
-        html_paper = response_paper.text
-        soup_paper = BeautifulSoup(html_paper,'lxml')
-        paper_date_content = '#abs > div.dateline'
-        paper_date_content_ = soup_paper.select(paper_date_content)
-        date = 'date:' + strname_date(paper_date_content_[0].text)
-        #print(date)
-        f.write(date)
-        f.write('\n\n\n')
-        print(f"第{i+1}篇论文保存成功")
-        #下载论文pdf格式
-        pdf_address = r'https://arxiv.org' + pdf_content_all[i].get('href')
-        download_pdf(pdf_address,i)
-    
+#写入文件到数据库
+# errors='ignore：遇到非法字符（即不是utf-8标准），则跳过
+# with open('papers.txt','w',errors='ignore') as f:
+
+for i in range(0,len(title_all_)):
+        
+    #l论文序号
+
+    #print(number_all_[i].text)    
+    #论文标题
+
+    #print(title_all_[i].text)
+    #论文作者
+
+    #print(authors_all_[i].text)
+    #论文类别
+
+    #print(subject_all_[i].text)
+    #论文日期
+    response_paper = requests.get(address_list[i],headers=headers)
+    html_paper = response_paper.text
+    soup_paper = BeautifulSoup(html_paper,'lxml')
+    paper_date_content = '#abs > div.dateline'
+    paper_date_content_ = soup_paper.select(paper_date_content)
+    date = 'date:' + strname_date(paper_date_content_[0].text)
+    #print(date)
+    val=((number_all_[i].text).strip(),(title_all_[i].text).strip(),((authors_all_[i].text).strip()).replace('\n',''),(subject_all_[i].text).strip(),date)
+    #去掉列表中的空字符
+    print(val)
+    print(f"第{i+1}篇论文保存成功")
+    # #下载论文pdf格式
+    # pdf_address = r'https://arxiv.org' + pdf_content_all[i].get('href')
+    # download_pdf(pdf_address,i)
+print('hello world')
 
 
