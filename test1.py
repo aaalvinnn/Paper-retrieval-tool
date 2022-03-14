@@ -3,16 +3,60 @@ from bs4 import BeautifulSoup
 from fake_useragent import FakeUserAgent
 import random
 from requests.adapters import HTTPAdapter
-import ms
-
+import os
+from urllib.request import urlretrieve
+from sqlite3 import connect
+import mysql.connector
+#爬虫初始化
 url = 'https://arxiv.org/list/cs.AI/pastweek?skip=0&show=1000'
 headers = {'User-Agent':FakeUserAgent().random}
 response = requests.get(url, headers=headers)
 html = response.text
 soup = BeautifulSoup(html, 'lxml')
-import os
-from urllib.request import urlretrieve
-
+#连接数据库
+config = {
+    'user' : 'root',
+    'password' : 'Zsw,20021216',
+    'host' : 'localhost',
+    'port' : '3306',
+    'database' : 'Papers'
+}
+con = mysql.connector.connect(**config)
+#创建游标
+mycursor = con.cursor(buffered = True)
+#检查表存在函数
+def tableExists(mycursor, name):
+    stmt = "SHOW TABLES LIKE '"+name+"'"
+    mycursor.execute(stmt)
+    return mycursor.fetchone()
+#删除表函数
+def dropTable(mycursor, name):
+    stmt = "DROP TABLE IF EXISTS" +name
+    mycursor.execute(stmt)
+    
+#增添整条数据
+def add_data(mycursor,val):
+    sql = 'INSERT INTO safe1(No,arXiv,title,authors,date,subjects) VALUES(%s,%s,%s,%s,%s,%s)'
+    mycursor.execute(sql,val)
+    con.commit()
+#更改一条中某个字段的数据
+def modify_data(mycursor,field,old_data,new_data):
+    sql = f"UPDATE safe1 SET {field}='{new_data}' WHERE {field}= '{old_data}'"
+    mycursor.execute(sql)
+    con.commit()
+#删除某条数据记录函数
+def delete_data(mycursor,field,val):
+    sql = f"DELETE FROM safe1 WHERE {field}= '{val}'"
+    mycursor.execute(sql)
+    con.commit()
+#显示当前数据库信息
+def search_all_data(mycursor):
+    print('arXiv title authors date subjects')
+    sql = 'SELECT * FROM safe1'
+    mycursor.execute(sql)
+    myresult = mycursor.fetchall()
+    for x in myresult:
+        print(x)
 #论文标题
 title_all = '#dlpage > dl > dd > div > div.list-title.mathjax'
 title_all_ = soup.select(title_all)
@@ -58,30 +102,17 @@ def download_pdf(pdf_url,i):
 # with open('papers.txt','w',errors='ignore') as f:
 
 for i in range(0,len(title_all_)):
-        
-    #l论文序号
 
-    #print(number_all_[i].text)    
-    #论文标题
-
-    #print(title_all_[i].text)
-    #论文作者
-
-    #print(authors_all_[i].text)
-    #论文类别
-
-    #print(subject_all_[i].text)
-    #论文日期
     response_paper = requests.get(address_list[i],headers=headers)
     html_paper = response_paper.text
     soup_paper = BeautifulSoup(html_paper,'lxml')
     paper_date_content = '#abs > div.dateline'
     paper_date_content_ = soup_paper.select(paper_date_content)
-    date = 'date:' + strname_date(paper_date_content_[0].text)
-    #print(date)
-    val=((number_all_[i].text).strip(),(title_all_[i].text).strip(),((authors_all_[i].text).strip()).replace('\n',''),(subject_all_[i].text).strip(),date)
+    date = strname_date(paper_date_content_[0].text)
+    #去掉各字符串的前缀部分
+    val=(i+1,(number_all_[i].text[6:]).strip(),(title_all_[i].text[7:]).strip(),((authors_all_[i].text[9:]).strip()).replace('\n',''),date,(subject_all_[i].text[10:]).strip())
     #去掉列表中的空字符
-    print(val)
+    add_data(mycursor,val)
     print(f"第{i+1}篇论文保存成功")
     # #下载论文pdf格式
     # pdf_address = r'https://arxiv.org' + pdf_content_all[i].get('href')
