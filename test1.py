@@ -36,7 +36,7 @@ def dropTable(mycursor, name):
     
 #增添整条数据
 def add_data(mycursor,val):
-    sql = 'INSERT INTO safe1(No,arXiv,title,authors,date,subjects) VALUES(%s,%s,%s,%s,%s,%s)'
+    sql = 'INSERT INTO safe1(No,arXiv,title,authors,date,subjects,address) VALUES(%s,%s,%s,%s,%s,%s,%s)'
     mycursor.execute(sql,val)
     con.commit()
 #更改一条中某个字段的数据
@@ -102,15 +102,15 @@ def download_pdf(pdf_url,i):
 # with open('papers.txt','w',errors='ignore') as f:
 
 for i in range(0,len(title_all_)):
-
     response_paper = requests.get(address_list[i],headers=headers)
     html_paper = response_paper.text
     soup_paper = BeautifulSoup(html_paper,'lxml')
     paper_date_content = '#abs > div.dateline'
     paper_date_content_ = soup_paper.select(paper_date_content)
     date = strname_date(paper_date_content_[0].text)
+    pdf_address = r'https://arxiv.org' + pdf_content_all[i].get('href')
     #去掉各字符串的前缀部分
-    val=(i+1,(number_all_[i].text[6:]).strip(),(title_all_[i].text[7:]).strip(),((authors_all_[i].text[9:]).strip()).replace('\n',''),date,(subject_all_[i].text[10:]).strip())
+    val=(i+1,(number_all_[i].text[6:]).strip(),(title_all_[i].text[7:]).strip(),((authors_all_[i].text[9:]).strip()).replace('\n',''),date,(subject_all_[i].text[10:]).strip(),pdf_address)
     #去掉列表中的空字符
     add_data(mycursor,val)
     print(f"第{i+1}篇论文保存成功")
@@ -118,5 +118,6 @@ for i in range(0,len(title_all_)):
     # pdf_address = r'https://arxiv.org' + pdf_content_all[i].get('href')
     # download_pdf(pdf_address,i)
 print('hello world')
+
 
 
