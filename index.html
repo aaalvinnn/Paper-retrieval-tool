@@ -1,0 +1,30 @@
+<html>
+    <!--引入jQuery包用于使用ajax-->
+    <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <h1>论文索引系统</h1>
+    <!--创建一个input输入框，定义id分别为name,age-->
+    <input type="text" id="title" name="title" placeholder="标题">
+    <br>
+
+    <!--创建button按钮，点击则激发submit()事件-->
+    <button onclick="submit();">确定</button>
+    <script>
+        /*在这里编写submit()事件*/
+        function submit() {
+            $.ajax({
+                url: "submit", /*数据提交到submit处*/
+                type: "POST",  /*采用POST方法提交*/
+                data: { "title": $("#title").val(),},  /*提交的数据（json格式），从输入框中获取*/
+                /*result为后端函数返回的json*/
+                success: function (result) {
+                    if (result.message == "success!") {
+                        alert("文章标题:"+result.title)
+                    }
+                    else {
+                        alert(result.message)
+                    }
+                }
+            });
+        }
+    </script>
+</html>

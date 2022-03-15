@@ -1,0 +1,74 @@
+<html>
+    <head>
+        <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    </head>
+    <body>
+        <h1>论文索引系统</h1>
+        <input type="text" id="title_name" name="title_name" placeholder="标题">
+        <button onclick="show();">确认</button>
+        <br>
+        <input type="text" id="No" name="No" placeholder="序号">
+        <button onclick="show1();">确认</button>
+        <br>
+        <input type="text" id="arxiv" name="arxiv" placeholder="arXiv号">
+        <button onclick="show_arxiv();">确认</button>
+        <!--result用来显示提交结果-->
+        <p id="result"></p>
+        <script>
+            function show() {
+                $.ajax({
+                    url: "show",
+                    type: "POST",
+                    data: { "title_name": $("#title_name").val()},
+                    /*不要忘记 result为后端处理函数的返回值！*/
+                    success: function (result) {
+                        if (result.status == "success") {
+                            $("#result").text(result.message)
+                        }
+                        else {
+                            $("#result").text("非法输入")
+                        }
+                    }
+                });
+            }
+        </script>
+        <p id="result1"></p>
+        <script>
+            function show1() {
+                $.ajax({
+                    url: "show1",
+                    type: "POST",
+                    data: { "No": $("#No").val()},
+                    /*不要忘记 result1为后端处理函数的返回值！*/
+                    success: function (result1) {
+                        if (result1.status == "success") {
+                            $("#result1").text(result1.message)
+                        }
+                        else {
+                            $("#result1").text("非法输入")
+                        }
+                    }
+                });
+            }
+        </script>
+        <p id="result_arxiv"></p>
+        <script>
+            function show_arxiv() {
+                $.ajax({
+                    url: "show_arxiv",
+                    type: "POST",
+                    data: { "arxiv": $("#arxiv").val()},
+                    /*不要忘记 result1为后端处理函数的返回值！*/
+                    success: function (result_arxiv) {
+                        if (result_arxiv.status == "success") {
+                            $("#result_arxiv").text(result_arxiv.message)
+                        }
+                        else {
+                            $("#result_arxiv").text("非法输入")
+                        }
+                    }
+                });
+            }
+        </script>
+    </body>
+</html>
