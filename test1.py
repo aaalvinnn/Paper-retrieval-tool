@@ -8,11 +8,12 @@ from urllib.request import urlretrieve
 from sqlite3 import connect
 import mysql.connector
 #爬虫初始化
-url = 'https://arxiv.org/list/cs.CV/20?skip=1538&show=462'
-headers = {'User-Agent':FakeUserAgent().random}
-response = requests.get(url, headers=headers)
-html = response.text
-soup = BeautifulSoup(html, 'lxml')
+def pc(url):
+    headers = {'User-Agent':FakeUserAgent().random}
+    response = requests.get(url, headers=headers)
+    html = response.text
+    soup = BeautifulSoup(html, 'lxml')
+    return soup
 #连接数据库
 config = {
     'user' : 'root',
@@ -57,6 +58,10 @@ def search_all_data(mycursor):
     myresult = mycursor.fetchall()
     for x in myresult:
         print(x)
+
+nums = 19000
+url = 'https://arxiv.org/list/cs.CV/19?skip=0&show=2000'
+soup = pc(url)
 #论文标题
 title_all = '#dlpage > dl > dd > div > div.list-title.mathjax'
 title_all_ = soup.select(title_all)
@@ -102,29 +107,22 @@ def download_pdf(pdf_url,i):
 # errors='ignore：遇到非法字符（即不是utf-8标准），则跳过
 # with open('papers.txt','w',errors='ignore') as f:
 
+
 for i in range(0,len(title_all_)):
     try:
-        response_paper = requests.get(address_list[i],headers=headers)
-        html_paper = response_paper.text
-        soup_paper = BeautifulSoup(html_paper,'lxml')
-        paper_date_content = '#abs > div.dateline'
-        paper_date_content_ = soup_paper.select(paper_date_content)
-        date = strname_date(paper_date_content_[0].text)
+        # soup_paper = pc(address_list[i])
+        # paper_date_content = '#abs > div.dateline'
+        # paper_date_content_ = soup_paper.select(paper_date_content)
+        date = number_all_[i].text[6:10]
         pdf_address = r'https://arxiv.org' + pdf_content_all[i].get('href')
         #去掉各字符串的前缀部分
-        val=(i+1539,(number_all_[i].text[6:]).strip(),(title_all_[i].text[7:]).strip(),((authors_all_[i].text[9:]).strip()).replace('\n',''),date,(subject_all_[i].text[10:]).strip(),pdf_address)
+        val=(i+nums+1,(number_all_[i].text[6:]).strip(),(title_all_[i].text[7:]).strip(),((authors_all_[i].text[9:]).strip()).replace('\n',''),date,(subject_all_[i].text[10:]).strip(),pdf_address)
         #去掉列表中的空字符
         add_data(mycursor,val)
-        print(f"第{i+1539}篇论文保存成功")
+        print(f"第{i+1+nums}篇论文保存成功")
     except:
-        print(f"第{i+1539}篇论文信息保存失败")
+        print(f"第{i+1+nums}篇论文信息保存失败")
     # #下载论文pdf格式
     # pdf_address = r'https://arxiv.org' + pdf_content_all[i].get('href')
     # download_pdf(pdf_address,i)
 print('hello world')
-
-
-
-
-
-

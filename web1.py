@@ -51,7 +51,7 @@ def show1():
         return {'status':"error", 'message': "code error"}
 @app.route("/show_arxiv",methods=["GET", "POST"])
 def show_arxiv():
-    #获取前端传入的No数据
+    #获取前端传入的arxiv数据
     if request.method == "POST":
         arxiv = request.form.get("arxiv")
     if request.method == "GET":
@@ -63,6 +63,24 @@ def show_arxiv():
         result_arxiv = sql.execute(f'SELECT * FROM safe1 WHERE arXiv = {arxiv}')
         if(len(result_arxiv)!=0):
             return {'status':'success','message':result_arxiv}
+        else:
+            return {'status':'success','message':"无相关记录"}
+    except Exception as e:
+        return {'status':"error", 'message': "code error"}
+@app.route("/show_address",methods=["GET", "POST"])
+def show_address():
+    #获取前端传入的arxiv数据
+    if request.method == "POST":
+        arxiv_ = request.form.get("address")
+    if request.method == "GET":
+        arxiv_ = request.form.get("address")
+    #创建Database类的对象
+    sql = Database("papers")
+    try:
+        result_arxiv = sql.execute(f'SELECT * FROM safe1 WHERE arXiv = {arxiv_}')
+        result_address = r'http://120.26.2.184:8080/papers/' + f'{arxiv_}' + '.pdf'
+        if(len(result_arxiv)!=0):
+            return {'status':'success','message':result_address}
         else:
             return {'status':'success','message':"无相关记录"}
     except Exception as e:
